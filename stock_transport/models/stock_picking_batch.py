@@ -9,11 +9,18 @@ class StockPickingBatch(models.Model):
         string="Vehicle", comodel_name='fleet.vehicle')
     vehicle_category_id = fields.Many2one(
         comodel_name='fleet.vehicle.model.category', string="Vehicle Category")
-    weight = fields.Float(string="Weight", compute='_compute_weight')
-    volume = fields.Float(string="Volume", compute='_compute_volume')
+    weight = fields.Float(
+        string="Weight", compute='_compute_weight', store=True)
+    volume = fields.Float(
+        string="Volume", compute='_compute_volume', store=True)
     lines = fields.Integer(string="Lines", compute="_compute_lines", store="1")
     transfers = fields.Integer(
         string="Transfers", compute="_compute_transfer", store="1")
+
+    @api.depends('weight', 'volume')
+    def _compute_display_name(self):
+        for record in self:
+            record.display_name = f"{record.name} ({record.weight} Kg,{record.volume} m3)"
 
     @api.onchange('vehicle_id')
     def _onchange_for_vehicle_category(self):
@@ -25,8 +32,8 @@ class StockPickingBatch(models.Model):
         for record in self:
             s = sum(record.move_line_ids.product_id.mapped('weight'))
             if record.vehicle_category_id.max_weight:
-                record.weight = (
-                    s / record.vehicle_category_id.max_weight) * 100
+                record.weight = round((
+                    s / record.vehicle_category_id.max_weight) * 100, 2)
             else:
                 record.weight = 0
 
@@ -45,7 +52,7 @@ class StockPickingBatch(models.Model):
         for record in self:
             s = sum(record.move_line_ids.product_id.mapped('volume'))
             if record.vehicle_category_id.max_volume:
-                record.volume = (
-                    s / record.vehicle_category_id.max_volume) * 100
+                record.volume = round((
+                    s / record.vehicle_category_id.max_weight) * 100, 2)
             else:
                 record.volume = 0

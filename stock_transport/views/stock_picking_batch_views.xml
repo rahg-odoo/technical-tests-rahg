@@ -8,6 +8,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='scheduled_date']" position='replace'>
                 <field name='vehicle_id'/>
+                <field name='scheduled_date'/>
                 <field name='vehicle_category_id'/>
                 <field name='dock_id'/>
                 <field name='weight' widget="progressbar"/>
@@ -22,7 +23,7 @@
         <field name="model">stock.picking.batch</field>
         <field name="arch" type="xml">
             <graph>
-                <field name="scheduled_date"/>
+                <field name="scheduled_date" interval="day"/>
                 <field name="vehicle_category_id"/>
                 <field name="volume" type="measure"/>
                 <field name="weight" type="measure"/>
@@ -38,8 +39,8 @@
         <field name="arch" type="xml">
             <gantt date_start="scheduled_date" date_stop="scheduled_date" default_group_by="dock_id,vehicle_id" default_scale="week" color="dock_id" decoration-info="state == 'draft'">
                 <field name="name"/>
-                <field name="volume"/>
-                <field name="weight"/>
+                <field name="volume" type='measure' />
+                <field name="weight" type='measure' />
                 <field name="state"/>
             </gantt>
         </field>
